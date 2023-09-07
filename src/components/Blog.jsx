@@ -31,14 +31,14 @@ const Blog = ({ blog, addLike, user, removeBlog }) => {
 
   return (
     <div style={blogStyle}>
-      <div>
-        <h3>{blog.title} <button onClick={handleClick}>{displayMode === "short" ? "Show " : "Hide"}</button></h3>
+      <div className="blog">
+        <h3>{blog.title} <button className="show-hide-button" onClick={handleClick}>{displayMode === "short" ? "Show " : "Hide"}</button></h3>
         {displayMode === "long" &&
         <>
           <p>{blog.url}</p>
-          <p>{blog.likes} <button onClick={() => addLike(blog.id)}>Like</button></p>
+          <p>{blog.likes} likes<button className="like-button" onClick={() => addLike(blog.id)}>Like</button></p>
           <small>{blog.author}</small>
-          {allowedToRemove && <p><button onClick={handleRemove}>Remove</button></p>}
+          {allowedToRemove && <p><button className="delete-blog-button" onClick={handleRemove}>Remove</button></p>}
         </>
         }
       </div>

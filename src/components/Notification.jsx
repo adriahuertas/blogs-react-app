@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"
 
 const successStyles = {
   color: "green",
@@ -8,7 +8,7 @@ const successStyles = {
   borderRadius: "5px",
   padding: "10px",
   marginBottom: "10px",
-};
+}
 
 const errorStyles = {
   color: "red",
@@ -18,24 +18,23 @@ const errorStyles = {
   borderRadius: "5px",
   padding: "10px",
   marginBottom: "10px",
-};
+}
 
 const Notification = ({ message, setMessage, type }) => {
   if (message === null) {
-    return null;
+    return null
   }
-
 
   setTimeout(() => {
-    setMessage(null);
+    setMessage(null)
   }
-  , 5000);
+  , 5000)
 
   return (
     <div className={type} style={type === "error" ? errorStyles : successStyles}>
       {message}
     </div>
-  );
-};
+  )
+}
 
-export default Notification;
+export default Notification

@@ -9,7 +9,8 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "test": "jest --watchAll",
     "preview": "vite preview",
-    "cypress:open": "cypress open"
+    "cypress:open": "cypress open",
+    "test:e2e": "cypress run"
   },
   "dependencies": {
     "@babel/preset-env": "^7.22.15",
@@ -32,6 +33,7 @@
     "cypress": "^13.1.0",
     "eslint": "^8.48.0",
     "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-cypress": "^2.14.0",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-jest": "^27.2.3",
     "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
