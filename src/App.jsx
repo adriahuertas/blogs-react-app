@@ -21,7 +21,6 @@ const App = () => {
     e.preventDefault()
     try {
       const user = await loginService.login({ username, password })
-      console.log(user)
       blogService.setToken(user.token)
       setUser(user)
       setUsername("")
@@ -73,6 +72,7 @@ const App = () => {
       ...blog,
       likes: blog.likes + 1
     }
+
     try {
       const updatedBlog = await blogService.update(id, blogObject)
       const newBlogs = blogs.map(blog => blog.id !== id ? blog : updatedBlog).sort((a, b) => b.likes - a.likes)
