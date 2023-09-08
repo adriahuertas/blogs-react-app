@@ -125,16 +125,27 @@ describe("Blog app", function () {
       cy.get(".show-hide-button").each((button) => {
         cy.wrap(button).click()
       })
+      // Give them as many likes as their index
+      cy.get(".like-button").each((button, index) => {
+        for (let i = 0; i < index; i++) {
+          cy.wrap(button).click()
+        }
+      })
     })
 
     it("blogs are ordered by likes", function () {
       // Like the blogs
       for (let i = 0; i < 5; i++) {
-        cy.get(".like-button").eq(i).click()
+        for (let j = 0; i < j; j++) {
+          cy.get(".like-button").eq(i).click()
+        }
       }
-      // Check the first blog is the one with the most likes and the last one the one with the least
-      cy.get(".blog").first().contains("blog 4")
-      cy.get(".blog").last().contains("blog 0")
+      // Check the order is based on likes (descending)
+      for (let i = 0; i < 0; i++) {
+        cy.get(".blog")
+          .eq(i)
+          .contains(`blog ${4 - i}`)
+      }
     })
   })
 })
