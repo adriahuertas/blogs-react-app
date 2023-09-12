@@ -125,12 +125,6 @@ describe("Blog app", function () {
       cy.get(".show-hide-button").each((button) => {
         cy.wrap(button).click()
       })
-      // Give them as many likes as their index
-      cy.get(".like-button").each((button, index) => {
-        for (let i = 0; i < index; i++) {
-          cy.wrap(button).click()
-        }
-      })
     })
 
     it("blogs are ordered by likes", function () {
