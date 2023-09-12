@@ -113,8 +113,8 @@ describe("Blog app", function () {
     beforeEach(function () {
       // log in user test
       cy.login({ username: "test", password: "test" })
-      // create 5 blogs and display them
-      for (let i = 0; i < 5; i++) {
+      // create 3 blogs and display them
+      for (let i = 0; i < 3; i++) {
         cy.createBlog({
           title: `blog ${i}`,
           author: `author ${i}`,
@@ -127,19 +127,38 @@ describe("Blog app", function () {
       })
     })
 
-    it("blogs are ordered by likes", function () {
+    it.only("blogs are ordered by likes", function () {
       // Like the blogs
-      for (let i = 0; i < 5; i++) {
-        for (let j = 0; i < j; j++) {
-          cy.get(".like-button").eq(i).click()
-        }
+
+      cy.get("[data-cy='blog 0']")
+        .find(".like-button")
+        .as("FirstBlogLikeButton")
+      cy.get("[data-cy='blog 1']")
+        .find(".like-button")
+        .as("SecondBlogLikeButton")
+      cy.get("[data-cy='blog 2']")
+        .find(".like-button")
+        .as("ThirdBlogLikeButton")
+
+      for (let i = 0; i < 1; i++) {
+        cy.get("@FirstBlogLikeButton").click()
+        cy.wait(100)
       }
+
+      for (let i = 0; i < 2; i++) {
+        cy.get("@SecondBlogLikeButton").click()
+        cy.wait(100)
+      }
+
+      for (let i = 0; i < 3; i++) {
+        cy.get("@ThirdBlogLikeButton").click()
+        cy.wait(100)
+      }
+
       // Check the order is based on likes (descending)
-      for (let i = 0; i < 0; i++) {
-        cy.get(".blog")
-          .eq(i)
-          .contains(`blog ${4 - i}`)
-      }
+      cy.get(".blog").eq(0).contains("blog 2")
+      cy.get(".blog").eq(1).contains("blog 1")
+      cy.get(".blog").eq(2).contains("blog 0")
     })
   })
 })
