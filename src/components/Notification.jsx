@@ -1,4 +1,6 @@
-import React from "react"
+import React, { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { clearNotification } from "reducers/notificationReducer"
 
 const successStyles = {
   color: "green",
@@ -20,18 +22,27 @@ const errorStyles = {
   marginBottom: "10px",
 }
 
-const Notification = ({ message, setMessage, type }) => {
-  if (message === null) {
+const Notification = () => {
+  const { message, type } = useSelector((state) => state.notification)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch(clearNotification())
+    }, 5000)
+
+    return () => clearTimeout(timer)
+  }, [dispatch, message])
+
+  if (message === "") {
     return null
   }
 
-  setTimeout(() => {
-    setMessage(null)
-  }
-  , 5000)
-
   return (
-    <div className={type} style={type === "error" ? errorStyles : successStyles}>
+    <div
+      className={type}
+      style={type === "error" ? errorStyles : successStyles}
+    >
       {message}
     </div>
   )
