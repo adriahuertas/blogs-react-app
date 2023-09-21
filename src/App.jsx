@@ -8,24 +8,22 @@ import Notification from "components/Notification"
 import Togglable from "components/Togglable"
 import { useDispatch, useSelector } from "react-redux"
 import { setNotification } from "./reducers/notificationReducer"
-import { initializeBlogs } from "reducers/blogReducer"
-import { setBlogs } from "./reducers/blogReducer"
+import { createBlog, initializeBlogs } from "reducers/blogReducer"
+
+import { clearUser, initializeUser, loginUser } from "./reducers/userReducer"
 
 const App = () => {
-  const [user, setUser] = useState(null)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
   const dispatch = useDispatch()
 
   const blogFormRef = useRef()
-
+  const user = useSelector((state) => state.user)
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
-      const user = await loginService.login({ username, password })
-      blogService.setToken(user.token)
-      setUser(user)
+      dispatch(loginUser(username, password))
       setUsername("")
       setPassword("")
       dispatch(
@@ -37,11 +35,9 @@ const App = () => {
       dispatch(setNotification({ message: "Wrong credentials", type: "error" }))
     }
   }
-
-  const handleLogout = (e) => {
-    e.preventDefault()
-    window.localStorage.removeItem("loggedBlogAppUser")
-    setUser(null)
+  const handleLogout = () => {
+    dispatch(clearUser())
+    dispatch(setNotification({ message: "Logout successful", type: "success" }))
   }
 
   const addBlog = async (title, author, url) => {
@@ -53,49 +49,10 @@ const App = () => {
     }
     try {
       blogFormRef.current.toggleVisibility()
-      const blog = await blogService.create(blogObject)
-      setBlogs(blogs.concat(blog))
+      dispatch(createBlog(blogObject))
       dispatch(
         setNotification({
-          message: `a new blog ${blog.title} by ${blog.author} added`,
-          type: "success",
-        })
-      )
-    } catch (exception) {
-      dispatch(
-        setNotification({ message: "Something went wrong", type: "error" })
-      )
-    }
-  }
-
-  const removeBlog = async (id) => {
-    try {
-      await blogService.deleteBlog(id)
-      const newBlogs = blogs.filter((blog) => blog.id !== id)
-      setBlogs(newBlogs)
-    } catch (exception) {
-      dispatch(
-        setNotification({ message: "Something went wrong", type: "error" })
-      )
-    }
-  }
-
-  const addLike = async (id) => {
-    const blog = blogs.find((blog) => blog.id === id)
-    const blogObject = {
-      ...blog,
-      likes: blog.likes + 1,
-    }
-
-    try {
-      const updatedBlog = await blogService.update(id, blogObject)
-      const newBlogs = blogs
-        .map((blog) => (blog.id !== id ? blog : updatedBlog))
-        .sort((a, b) => b.likes - a.likes)
-      setBlogs(newBlogs)
-      dispatch(
-        setNotification({
-          message: `Liked ${blog.title}!`,
+          message: `a new blog ${blogObject.title} by ${blogObject.author} added`,
           type: "success",
         })
       )
@@ -108,12 +65,14 @@ const App = () => {
 
   useEffect(() => {
     // Check loggin
-    const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser")
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
-    }
+    // const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser")
+    // if (loggedUserJSON) {
+    //   const user = JSON.parse(loggedUserJSON)
+    //   setUser(user)
+    //   blogService.setToken(user.token)
+    // }
+    dispatch(initializeUser())
+
     blogService
       .getAll()
       .then((blogs) =>
@@ -158,13 +117,7 @@ const App = () => {
         {user &&
           blogs.map((blog, index) => (
             <div data-cy={blog.title} key={blog.id}>
-              <Blog
-                key={blog.id}
-                blog={blog}
-                addLike={addLike}
-                user={user}
-                removeBlog={removeBlog}
-              />
+              <Blog key={blog.id} blog={blog} user={user} />
             </div>
           ))}
       </div>

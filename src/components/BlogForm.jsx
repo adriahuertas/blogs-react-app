@@ -6,14 +6,15 @@ const blogForm = ({ addBlog }) => {
   const [url, setUrl] = useState("")
 
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault()
-      addBlog(title, author, url)
-      setTitle("")
-      setAuthor("")
-      setUrl("")
-    }
-      }>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        addBlog(title, author, url)
+        setTitle("")
+        setAuthor("")
+        setUrl("")
+      }}
+    >
       <div>
         Title
         <input
@@ -44,7 +45,9 @@ const blogForm = ({ addBlog }) => {
           name="title"
         />
       </div>{" "}
-      <button id="create-blog-button" type="submit">save</button>
+      <button id="create-blog-button" type="submit">
+        save
+      </button>
     </form>
   )
 }
