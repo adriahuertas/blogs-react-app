@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useContext } from "react"
 import Blog from "components/Blog"
 import blogService from "services/blogs"
 import loginService from "services/login"
@@ -6,16 +6,22 @@ import LoginForm from "components/LoginForm"
 import BlogForm from "components/BlogForm"
 import Notification from "components/Notification"
 import Togglable from "components/Togglable"
+import { useQuery } from "react-query"
+import NotificationContext from "./context/NotificationContext"
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [successMessage, setSuccessMessage] = useState(null)
+  const [notification, setNotification] = useState({
+    message: null,
+    type: null,
+  })
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
   const blogFormRef = useRef()
+  const result = useQuery("blogs", blogService.getAll, {
+    refetchOnWindowFocus: false,
+  })
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -25,11 +31,11 @@ const App = () => {
       setUser(user)
       setUsername("")
       setPassword("")
-      setSuccessMessage("Login successful")
+      setNotification({ message: "Login successful", type: "success" })
 
       window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user))
     } catch (exception) {
-      setErrorMessage("Wrong credentials")
+      setNotification({ message: "Wrong credentials", type: "error" })
     }
   }
 
@@ -39,22 +45,22 @@ const App = () => {
     setUser(null)
   }
 
-  const addBlog = async (title, author, url) => {
-    const blogObject = {
-      title,
-      author,
-      url,
-      date: new Date().toISOString()
-    }
-    try {
-      blogFormRef.current.toggleVisibility()
-      const blog = await blogService.create(blogObject)
-      setBlogs(blogs.concat(blog))
-      setSuccessMessage(`a new blog ${blog.title} by ${blog.author} added`)
-    } catch (exception) {
-      setErrorMessage("Something went wrong")
-    }
-  }
+  // const addBlog = async (title, author, url) => {
+  //   const blogObject = {
+  //     title,
+  //     author,
+  //     url,
+  //     date: new Date().toISOString(),
+  //   }
+  //   try {
+  //     blogFormRef.current.toggleVisibility()
+  //     const blog = await blogService.create(blogObject)
+  //     setBlogs(blogs.concat(blog))
+  //     setSuccessMessage(`a new blog ${blog.title} by ${blog.author} added`)
+  //   } catch (exception) {
+  //     setErrorMessage("Something went wrong")
+  //   }
+  // }
 
   const removeBlog = async (id) => {
     try {
@@ -62,25 +68,27 @@ const App = () => {
       const newBlogs = blogs.filter((blog) => blog.id !== id)
       setBlogs(newBlogs)
     } catch (exception) {
-      setErrorMessage("Something went wrong")
+      setNotification({ message: "Something went wrong", type: "error" })
     }
   }
 
-  const addLike = async (id) => {
-    const blog = blogs.find((blog) => blog.id === id)
-    const blogObject = {
-      ...blog,
-      likes: blog.likes + 1
-    }
+  // const addLike = async (id) => {
+  //   const blog = blogs.find((blog) => blog.id === id)
+  //   const blogObject = {
+  //     ...blog,
+  //     likes: blog.likes + 1,
+  //   }
 
-    try {
-      const updatedBlog = await blogService.update(id, blogObject)
-      const newBlogs = blogs.map(blog => blog.id !== id ? blog : updatedBlog).sort((a, b) => b.likes - a.likes)
-      setBlogs(newBlogs)
-    } catch (exception) {
-      setErrorMessage("Something went wrong")
-    }
-  }
+  //   try {
+  //     const updatedBlog = await blogService.update(id, blogObject)
+  //     const newBlogs = blogs
+  //       .map((blog) => (blog.id !== id ? blog : updatedBlog))
+  //       .sort((a, b) => b.likes - a.likes)
+  //     setBlogs(newBlogs)
+  //   } catch (exception) {
+  //     setNotification({ message: "Something went wrong", type: "error" })
+  //   }
+  // }
 
   useEffect(() => {
     // Check loggin
@@ -90,58 +98,62 @@ const App = () => {
       setUser(user)
       blogService.setToken(user.token)
     }
-    blogService
-      .getAll()
-      .then((blogs) => setBlogs(blogs.sort((a, b) => b.likes - a.likes)))
-      .catch((err) => console.log(err))
   }, [])
 
-  return (
-    <>
-      <div>
-        <h2>Blogs</h2>
-        <Notification
-          message={errorMessage}
-          setMessage={setErrorMessage}
-          type="error"
-        />
-        <Notification
-          message={successMessage}
-          setMessage={setSuccessMessage}
-          type="success"
-        />
-        {!user &&
-        <Togglable buttonLabel='login'>
-          <LoginForm
-            username={username}
-            password={password}
-            handleUsernameChange={({ target }) => setUsername(target.value)}
-            handlePasswordChange={({ target }) => setPassword(target.value)}
-            handleSubmit={handleLogin}
-          />
-        </Togglable>}
-        {user &&
-          <div>
-            <p>{user.name} logged in</p>
-            <button onClick={handleLogout}>logout</button>
-          </div>
-        }
-        {user &&
-          <Togglable buttonLabel='new blog' ref={blogFormRef}>
-            <div>
-              <BlogForm addBlog={addBlog}/>
-            </div>
-          </Togglable>
-        }
+  if (result.isLoading) <h1>Loading...</h1>
 
-        {user && blogs.map((blog, index) => (
-          <div data-cy={blog.title} key={blog.id}>
-            <Blog key={blog.id} blog={blog} addLike={addLike} user={user} removeBlog={removeBlog}/>
-          </div>
-        ))}
-      </div>
-    </>
-  )
+  if (result.isError) <h1>Something went wrong</h1>
+
+  const blogs = result.data
+
+  if (blogs) {
+    return (
+      <NotificationContext.Provider value={[notification, setNotification]}>
+        <div>
+          <h2>Blogs</h2>
+
+          <Notification />
+
+          {!user && (
+            <Togglable buttonLabel="login">
+              <LoginForm
+                username={username}
+                password={password}
+                handleUsernameChange={({ target }) => setUsername(target.value)}
+                handlePasswordChange={({ target }) => setPassword(target.value)}
+                handleSubmit={handleLogin}
+              />
+            </Togglable>
+          )}
+          {user && (
+            <div>
+              <p>{user.name} logged in</p>
+              <button onClick={handleLogout}>logout</button>
+            </div>
+          )}
+          {user && (
+            <Togglable buttonLabel="new blog" ref={blogFormRef}>
+              <div>
+                <BlogForm />
+              </div>
+            </Togglable>
+          )}
+
+          {user &&
+            blogs.map((blog, index) => (
+              <div data-cy={blog.title} key={blog.id}>
+                <Blog
+                  key={blog.id}
+                  blog={blog}
+                  user={user}
+                  removeBlog={removeBlog}
+                />
+              </div>
+            ))}
+        </div>
+      </NotificationContext.Provider>
+    )
+  }
 }
 
 export default App

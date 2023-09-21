@@ -1,19 +1,44 @@
-import React, { useState } from "react"
+import React, { useState, useContext } from "react"
+import { useMutation, useQueryClient } from "react-query"
+import blogService from "../services/blogs"
 
-const blogForm = ({ addBlog }) => {
+import NotificationContext from "context/NotificationContext"
+
+const blogForm = () => {
+  const queryClient = useQueryClient()
   const [title, setTitle] = useState("")
   const [author, setAuthor] = useState("")
   const [url, setUrl] = useState("")
+  const [notification, setNotification] = useContext(NotificationContext)
+
+  const newBlogMutation = useMutation(blogService.create, {
+    onSuccess: (newBlog) => {
+      const blogs = queryClient.getQueryData("blogs")
+      queryClient.setQueryData("blogs", blogs.concat(newBlog))
+      setNotification({ message: `${newBlog.title} added!`, type: "success" })
+    },
+  })
+
+  const addBlog = async (title, author, url) => {
+    const blogObject = {
+      title,
+      author,
+      url,
+      date: new Date().toISOString(),
+    }
+    newBlogMutation.mutate(blogObject)
+  }
 
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault()
-      addBlog(title, author, url)
-      setTitle("")
-      setAuthor("")
-      setUrl("")
-    }
-      }>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        addBlog(title, author, url)
+        setTitle("")
+        setAuthor("")
+        setUrl("")
+      }}
+    >
       <div>
         Title
         <input
@@ -44,7 +69,9 @@ const blogForm = ({ addBlog }) => {
           name="title"
         />
       </div>{" "}
-      <button id="create-blog-button" type="submit">save</button>
+      <button id="create-blog-button" type="submit">
+        save
+      </button>
     </form>
   )
 }
