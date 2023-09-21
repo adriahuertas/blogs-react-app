@@ -9,8 +9,11 @@ import Togglable from "components/Togglable"
 import { useDispatch, useSelector } from "react-redux"
 import { setNotification } from "./reducers/notificationReducer"
 import { createBlog, initializeBlogs } from "reducers/blogReducer"
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom"
 
 import { clearUser, initializeUser, loginUser } from "./reducers/userReducer"
+import UserListContainer from "./components/UserListContainer"
+import UserDetailsContainer from "./components/UserDetailsContainer"
 
 const App = () => {
   const [username, setUsername] = useState("")
@@ -106,20 +109,22 @@ const App = () => {
             <button onClick={handleLogout}>logout</button>
           </div>
         )}
-        {user && (
-          <Togglable buttonLabel="new blog" ref={blogFormRef}>
-            <div>
-              <BlogForm addBlog={addBlog} />
-            </div>
-          </Togglable>
-        )}
-
-        {user &&
-          blogs.map((blog, index) => (
-            <div data-cy={blog.title} key={blog.id}>
-              <Blog key={blog.id} blog={blog} user={user} />
-            </div>
-          ))}
+        <Router>
+          <Routes>
+            <Route path="/" element={user && <BlogForm />} />
+            <Route path="/users" element={user && <UserListContainer />} />
+            <Route
+              path="/users/:id"
+              element={user && <UserDetailsContainer />}
+            />
+          </Routes>{" "}
+          {user &&
+            blogs.map((blog, index) => (
+              <div data-cy={blog.title} key={blog.id}>
+                <Blog key={blog.id} blog={blog} user={user} />
+              </div>
+            ))}
+        </Router>
       </div>
     </>
   )
