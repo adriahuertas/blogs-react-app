@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from "react"
-import Blog from "components/Blog"
+import React, { useState, useEffect } from "react"
 import blogService from "services/blogs"
-import loginService from "services/login"
 import LoginForm from "components/LoginForm"
 import BlogForm from "components/BlogForm"
 import Notification from "components/Notification"
-import Togglable from "components/Togglable"
 import { useDispatch, useSelector } from "react-redux"
 import { setNotification } from "./reducers/notificationReducer"
-import { createBlog, initializeBlogs } from "reducers/blogReducer"
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom"
+import { initializeBlogs } from "reducers/blogReducer"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 
 import { clearUser, initializeUser, loginUser } from "./reducers/userReducer"
 import UserListContainer from "./components/UserListContainer"
 import UserDetailsContainer from "./components/UserDetailsContainer"
+import BlogListContainer from "components/BlogListContainer"
+import NavBar from "./components/NavBar"
+import BlogDetails from "./components/BlogDetails"
 
 const App = () => {
   const [username, setUsername] = useState("")
@@ -21,59 +21,28 @@ const App = () => {
 
   const dispatch = useDispatch()
 
-  const blogFormRef = useRef()
   const user = useSelector((state) => state.user)
   const handleLogin = async (e) => {
     e.preventDefault()
-    try {
-      dispatch(loginUser(username, password))
-      setUsername("")
-      setPassword("")
+    const success = await dispatch(loginUser(username, password))
+    setUsername("")
+    setPassword("")
+    if (success) {
       dispatch(
         setNotification({ message: "Login successful", type: "success" })
       )
-
-      window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user))
-    } catch (exception) {
+    } else {
       dispatch(setNotification({ message: "Wrong credentials", type: "error" }))
     }
   }
+
   const handleLogout = () => {
     dispatch(clearUser())
     dispatch(setNotification({ message: "Logout successful", type: "success" }))
-  }
-
-  const addBlog = async (title, author, url) => {
-    const blogObject = {
-      title,
-      author,
-      url,
-      date: new Date().toISOString(),
-    }
-    try {
-      blogFormRef.current.toggleVisibility()
-      dispatch(createBlog(blogObject))
-      dispatch(
-        setNotification({
-          message: `a new blog ${blogObject.title} by ${blogObject.author} added`,
-          type: "success",
-        })
-      )
-    } catch (exception) {
-      dispatch(
-        setNotification({ message: "Something went wrong", type: "error" })
-      )
-    }
+    console.log(user)
   }
 
   useEffect(() => {
-    // Check loggin
-    // const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser")
-    // if (loggedUserJSON) {
-    //   const user = JSON.parse(loggedUserJSON)
-    //   setUser(user)
-    //   blogService.setToken(user.token)
-    // }
     dispatch(initializeUser())
 
     blogService
@@ -84,48 +53,51 @@ const App = () => {
       .catch((err) => console.log(err))
   }, [])
 
-  const blogs = useSelector((state) => state.blog)
-
   return (
     <>
-      <div>
-        <h2>Blogs</h2>
-        <Notification />
-
-        {!user && (
-          <Togglable buttonLabel="login">
-            <LoginForm
-              username={username}
-              password={password}
-              handleUsernameChange={({ target }) => setUsername(target.value)}
-              handlePasswordChange={({ target }) => setPassword(target.value)}
-              handleSubmit={handleLogin}
-            />
-          </Togglable>
-        )}
-        {user && (
-          <div>
-            <p>{user.name} logged in</p>
-            <button onClick={handleLogout}>logout</button>
-          </div>
-        )}
-        <Router>
+      {" "}
+      <Router>
+        <div>
+          <NavBar />
+          <h2>Blogs</h2>
+          <Notification />
+          {user && (
+            <div>
+              <p>{user.name} logged in</p>
+              <button onClick={handleLogout}>logout</button>
+            </div>
+          )}
           <Routes>
             <Route path="/" element={user && <BlogForm />} />
+            <Route
+              path="/login"
+              element={
+                !user && (
+                  <LoginForm
+                    username={username}
+                    password={password}
+                    handleUsernameChange={({ target }) =>
+                      setUsername(target.value)
+                    }
+                    handlePasswordChange={({ target }) =>
+                      setPassword(target.value)
+                    }
+                    handleSubmit={handleLogin}
+                  />
+                )
+              }
+            />
+            <Route path="/create" element={user && <BlogForm />} />
             <Route path="/users" element={user && <UserListContainer />} />
+            <Route path="/blogs" element={user && <BlogListContainer />} />
+            <Route path="/blogs/:id" element={user && <BlogDetails />} />
             <Route
               path="/users/:id"
               element={user && <UserDetailsContainer />}
             />
           </Routes>{" "}
-          {user &&
-            blogs.map((blog, index) => (
-              <div data-cy={blog.title} key={blog.id}>
-                <Blog key={blog.id} blog={blog} user={user} />
-              </div>
-            ))}
-        </Router>
-      </div>
+        </div>{" "}
+      </Router>
     </>
   )
 }

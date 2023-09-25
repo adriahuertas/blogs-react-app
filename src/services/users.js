@@ -6,9 +6,9 @@ const getAll = async () => {
   return response.data
 }
 
-const getUserById = async (id) => {
+const getById = async (id) => {
   const request = await axios.get(`${baseUrl}/${id}`)
   return request.data
 }
 
-export default { getAll, getUserById }
+export default { getAll, getById }

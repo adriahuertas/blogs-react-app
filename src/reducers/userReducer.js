@@ -4,11 +4,7 @@ import blogService from "../services/blogs"
 
 export const userSlice = createSlice({
   name: "user",
-  initialState: {
-    token: "",
-    username: "",
-    name: "",
-  },
+  initialState: null,
   reducers: {
     setUser: (state, action) => {
       return action.payload
@@ -30,10 +26,18 @@ export const userSlice = createSlice({
 
 export const loginUser = (username, password) => {
   return async (dispatch) => {
-    const user = await loginService.login({ username, password })
-    blogService.setToken(user.token)
-    dispatch(setUser(user))
-    window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user))
+    try {
+      const user = await loginService.login({ username, password })
+      if (user) {
+        blogService.setToken(user.token)
+        dispatch(setUser(user))
+        window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user))
+        return true
+      }
+    } catch (exception) {
+      console.log(exception.message)
+      return false
+    }
   }
 }
 
