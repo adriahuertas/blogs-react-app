@@ -127,7 +127,7 @@ describe("Blog app", function () {
       })
     })
 
-    it.only("blogs are ordered by likes", function () {
+    it("blogs are ordered by likes", function () {
       // Like the blogs
 
       cy.get("[data-cy='blog 0']")
