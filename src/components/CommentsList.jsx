@@ -7,7 +7,6 @@ const CommentsList = ({ comments, blogId }) => {
   return (
     <>
       <small style={{ paddingBottom: "20px" }}>Comments</small>
-      <CommentForm blogId={blogId} />
       <ListGroup>
         {comments
           .slice()
@@ -23,6 +22,7 @@ const CommentsList = ({ comments, blogId }) => {
               </small>
             </ListGroupItem>
           ))}
+        <CommentForm blogId={blogId} />
       </ListGroup>
     </>
   )
