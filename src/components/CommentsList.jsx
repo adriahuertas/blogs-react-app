@@ -18,8 +18,8 @@ const CommentsList = ({ comments, blogId }) => {
               style={{ marginBottom: 20, borderRadius: 5 }}
             >
               {comment.text}
-              <small style={{ marginLeft: 25 }}>
-                {new Date(comment.date).toLocaleString()}
+              <small style={{ marginLeft: 7, fontSize: 13 }}>
+                - {new Date(comment.date).toLocaleString()}
               </small>
             </ListGroupItem>
           ))}
