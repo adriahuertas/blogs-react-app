@@ -31,26 +31,30 @@ export const initializeBlogs = () => {
 
 export const createBlog = (blog) => {
   return async (dispatch) => {
-    const newBlog = await blogService.create(blog)
-    console.log(newBlog)
-    dispatch(appendBlog(newBlog))
-    if (newBlog) return true
+    try {
+      const newBlog = await blogService.create(blog)
+      console.log(newBlog)
+      dispatch(appendBlog(newBlog))
+      if (newBlog) return true
+    } catch (error) {
+      return false
+    }
 
     return false
   }
 }
 
 export const addLike = (blog) => {
-  console.log("Hola")
-  console.log("BLOasdasdasdGOBJECT", blog)
   return async (dispatch) => {
-    console.log("IJOSADJIOSAD", blog)
-    const updatedBlog = await blogService.update(blog.id, {
-      ...blog,
-      likes: blog.likes + 1,
-    })
-    console.log("RETURNEDBLOG:", updatedBlog)
-    dispatch(updateBlog(updatedBlog))
+    try {
+      const updatedBlog = await blogService.update(blog.id, {
+        ...blog,
+        likes: blog.likes + 1,
+      })
+      dispatch(updateBlog(updatedBlog))
+    } catch (error) {
+      throw new Error(error.message)
+    }
   }
 }
 

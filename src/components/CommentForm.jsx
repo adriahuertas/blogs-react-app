@@ -23,7 +23,7 @@ const CommentForm = ({ blogId }) => {
   const isSubmitDisabled = comment.trim() === ""
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form style={{ marginTop: 10, marginBottom: 10 }} onSubmit={handleSubmit}>
       <input
         type="text"
         placeholder="Add comment..."

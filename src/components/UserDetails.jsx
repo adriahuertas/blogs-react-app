@@ -1,15 +1,21 @@
+import { Col, Container } from "react-bootstrap"
+import { Link } from "react-router-dom"
+
 const UserDetails = ({ user }) => {
   return (
-    <>
-      <h2>{user.username}</h2>
-      <h3>added blogs</h3>
+    <Container>
+      <h5>Blogs from user {user.username}</h5>
       <ul>
         {user.blogs.map((blog) => {
           console.log(blog)
-          return <li key={blog.id}>{blog.title}</li>
+          return (
+            <Col key={blog.id}>
+              <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+            </Col>
+          )
         })}
       </ul>
-    </>
+    </Container>
   )
 }
 

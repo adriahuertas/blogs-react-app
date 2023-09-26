@@ -1,17 +1,25 @@
 import UserDetails from "./UserDetails"
 
 import userService from "../services/users"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useQuery } from "react-query"
 import { useEffect } from "react"
+import { useSelector } from "react-redux"
 
 const UserDetailsContainer = () => {
   const { id } = useParams()
   console.log(id)
-
+  const navigate = useNavigate()
+  const user = useSelector((state) => state.user)
   const result = useQuery("userDetails", () => userService.getById(id), {
     refetchOnWindowFocus: false,
   })
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login")
+    }
+  }, [user, navigate])
 
   useEffect(() => {
     result.refetch()

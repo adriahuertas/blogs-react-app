@@ -1,8 +1,19 @@
+import { useNavigate } from "react-router-dom"
 import userService from "../services/users"
 import UserList from "./UserList"
 import { useQuery } from "react-query"
+import { useSelector } from "react-redux"
+import { useEffect } from "react"
 
 const UserListContainer = () => {
+  const navigate = useNavigate()
+  const user = useSelector((state) => state.user)
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login")
+    }
+  }, [user, navigate])
   const result = useQuery("usersList", userService.getAll, {
     refetchOnWindowFocus: false,
   })
@@ -23,7 +34,7 @@ const UserListContainer = () => {
 
   const users = result.data
 
-  return <UserList users={users} />
+  return user && <UserList users={users} />
 }
 
 export default UserListContainer
