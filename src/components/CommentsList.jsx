@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import CommentForm from "./CommentForm"
-import { Card, ListGroup, ListGroupItem } from "react-bootstrap"
+import { ListGroup, ListGroupItem } from "react-bootstrap"
 
 const CommentsList = ({ comments, blogId }) => {
   useEffect(() => {}, [comments])
